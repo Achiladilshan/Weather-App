@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:weather/weather.dart';
 import 'consts.dart';
+import 'weather_service.dart';
 
 class HomeContent extends StatefulWidget {
   @override
@@ -10,18 +10,42 @@ class HomeContent extends StatefulWidget {
 
 class _HomeContentState extends State<HomeContent> {
   bool isFavClicked = false;
-  final WeatherFactory _wf = WeatherFactory(OPENWEATHER_API_KEY);
+  late WeatherService weatherService;
+  Map<String, dynamic>? weatherData;
 
-  Weather? _weather;
 
   @override
   void initState() {
     super.initState();
-    _wf.currentWeatherByCityName("Madrid").then((w) {
+    weatherService = WeatherService(apiKey: WEATHER_API_KEY);
+    fetchWeatherData('colombo'); // Initial city name, replace with the desired city
+  }
+
+  Future<void> fetchWeatherData(String cityName) async {
+    try {
+      final data = await weatherService.getWeather(cityName);
       setState(() {
-        _weather = w;
+        weatherData = data;
       });
-    });
+    } catch (error) {
+      print('Error fetching weather data: $error');
+    }
+  }
+
+  String getWeatherImage() {
+    // Map weather status to image asset
+    String weatherStatus = weatherData?['current']['condition']['text'] ?? '';
+    switch (weatherStatus.toLowerCase()) {
+      case 'sunny':
+        return 'assets/weather/sunny.png';
+      case 'cloudy':
+        return 'assets/weather/cloudy.png';
+      case 'rain':
+        return 'assets/weather/rain.png';
+    // Add more cases for other weather conditions
+      default:
+        return 'assets/weather/61.png';
+    }
   }
 
   @override
@@ -29,8 +53,18 @@ class _HomeContentState extends State<HomeContent> {
     // Get today's date
     DateTime now = DateTime.now();
 
+    double deviceWidth = MediaQuery.of(context).size.width;
+
     // Format the date using the intl package
     String formattedDate = DateFormat('dd MMM yyyy').format(now);
+
+    String weatherStatus = weatherData?['current']['condition']['text'] ?? '';
+    int temperature = (weatherData?['current']?['temp_c'] ?? 0).toInt();
+    int wind = (weatherData?['current']?['wind_kph'] ?? 0).toInt();
+    int humidity = (weatherData?['current']?['humidity'] ?? 0).toInt();
+    print('$temperature');
+    print('$wind');
+    print('$humidity');
 
     return Scaffold(
       backgroundColor: Color(0xFFF3F4FB),
@@ -51,12 +85,11 @@ class _HomeContentState extends State<HomeContent> {
                 ),
                 SizedBox(height: 10),
                 Row(
-                  // Adjust the spacing between text and images
                   children: [
                     Image(
                       image: AssetImage('assets/icons/location.png'),
                     ),
-                    SizedBox(width: 8), // Adjust the spacing as needed
+                    SizedBox(width: 8),
                     Text(
                       'Colombo, Sri Lanka',
                       style: TextStyle(
@@ -76,19 +109,119 @@ class _HomeContentState extends State<HomeContent> {
                       child: Image(
                         image: AssetImage(
                           isFavClicked
-                              ? 'assets/icons/add-fav-red.png' // Red color image
-                              : 'assets/icons/add-fav.png', // Default image
+                              ? 'assets/icons/add-fav-red.png'
+                              : 'assets/icons/add-fav.png',
                         ),
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 10),
-                Center( // Center widget to center the sunny image
-                  child: Image(
-                    image: AssetImage('assets/weather/sunny.png'),
-                    width: 281,
-                    height: 342,
+                Center(
+                  child: Column(
+                    children: [
+                      Transform.translate(
+                      offset: const Offset(0, -30),
+                      child: Image(
+                          image: AssetImage(getWeatherImage()), // Dynamically change weather image
+                          width: 281,
+                          height: 342,
+                        ),
+                      ),
+                      Transform.translate(
+                        offset: const Offset(0, -70),
+                        child:Text(
+                          '${weatherStatus}',
+                          style: TextStyle(
+                            fontFamily: 'inter',
+                            fontSize: 24.0,
+                            color: Color(0xFF6066A6),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Transform.translate(
+                  offset: const Offset(0, -35),
+                  child:Center(
+                    child:Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              'Wind',
+                              style: TextStyle(
+                                fontFamily: 'inter',
+                                fontSize: 16.0,
+                                color: Color(0xFFA2A2BE),
+                              ),
+                            ),
+                            Text(
+                              '$wind km/h',
+                              style: TextStyle(
+                                fontFamily: 'inter',
+                                fontSize: 24.0,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black,
+                              ),
+                            ),
+                         ],
+                        ),
+                        SizedBox(width: 25),
+                        Image(
+                          image: AssetImage('assets/icons/line.png'),
+                        ),
+                        SizedBox(width: 25),
+                        Column(
+                          children: [
+                            Text(
+                              'Temp',
+                              style: TextStyle(
+                                fontFamily: 'inter',
+                                fontSize: 16.0,
+                                color: Color(0xFFA2A2BE),
+                              ),
+                            ),
+                            Text(
+                              '$temperature ℃',
+                              style: TextStyle(
+                                fontFamily: 'inter',
+                                fontSize: 24.0,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(width: 25),
+                        Image(
+                          image: AssetImage('assets/icons/line.png'),
+                        ),
+                        SizedBox(width: 25),
+                        Column(
+                          children: [
+                            Text(
+                              'Humidit',
+                              style: TextStyle(
+                                fontFamily: 'inter',
+                                fontSize: 16.0,
+                                color: Color(0xFFA2A2BE),
+                              ),
+                            ),
+                            Text(
+                              '$humidity%',
+                              style: TextStyle(
+                                fontFamily: 'inter',
+                                fontSize: 24.0,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
