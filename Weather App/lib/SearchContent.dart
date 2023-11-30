@@ -13,7 +13,6 @@ class _SearchContentState extends State<SearchContent> {
   WeatherService _weatherService = WeatherService(apiKey: WEATHER_API_KEY);
   List<String> _suggestedCities = [];
   String _selectedCity = '';
-  Map<String, dynamic> _weatherData = {};
 
   @override
   Widget build(BuildContext context) {
@@ -60,8 +59,10 @@ class _SearchContentState extends State<SearchContent> {
   }
 
   void _onSearchTextChanged(String input) {
-    if (input.length >= 2) {
+    if (input.length >= 1) {
       _weatherService.getSuggestedCities(input).then((suggestions) {
+        suggestions.sort();
+
         setState(() {
           _suggestedCities = suggestions.take(5).toList();
         });
@@ -74,22 +75,46 @@ class _SearchContentState extends State<SearchContent> {
   }
 
   Widget _buildSuggestedCities() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: _suggestedCities.map((cityAndCountry) {
-        // Split the city and country using comma as a separator
-        List<String> parts = cityAndCountry.split(', ');
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 2.0),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.6), // White container with transparency
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: _suggestedCities.map((cityAndCountry) {
+          // Split the city and country using a comma as a separator
+          List<String> parts = cityAndCountry.split(', ');
 
-        return ListTile(
-          title: Text(parts[0]), // Display the city
-          subtitle: Text(parts.length > 1 ? parts[1] : ''), // Display the country if available
-          onTap: () {
-            _onCitySelected(cityAndCountry);
-          },
-        );
-      }).toList(),
+          return Column(
+            children: [
+              ListTile(
+                title: Text(
+                  parts[0], // Display the city
+                  style: TextStyle(fontWeight: FontWeight.w400),
+                ),
+                subtitle: Text(
+                  parts.length > 1 ? parts[1] : '', // Display the country if available
+                  style: TextStyle(color: Color(0xFF878787)),
+                ),
+                onTap: () {
+                  _onCitySelected(cityAndCountry);
+                },
+              ),
+              Divider(
+                color: Color(0xFFe0e0eb),
+                height: 1, // Adjust the height of the divider
+                indent: 10,
+                endIndent: 10,
+              ),
+            ],
+          );
+        }).toList(),
+      ),
     );
   }
+
 
   void _onCitySelected(String cityAndCountry) {
     if (cityAndCountry.isNotEmpty) {
