@@ -3,22 +3,23 @@ import 'package:intl/intl.dart';
 import 'consts.dart';
 import 'weather_service.dart';
 
-class HomeContent extends StatefulWidget {
+class SearchCity extends StatefulWidget {
+  final String cityName;
+
+  SearchCity({required this.cityName});
+
   @override
-  _HomeContentState createState() => _HomeContentState();
+  _SearchCityState createState() => _SearchCityState();
 }
 
-class _HomeContentState extends State<HomeContent> {
-  bool isFavClicked = false;
-  late WeatherService weatherService;
+class _SearchCityState extends State<SearchCity> {
+  WeatherService weatherService = WeatherService(apiKey: WEATHER_API_KEY);
   Map<String, dynamic>? weatherData;
-
 
   @override
   void initState() {
     super.initState();
-    weatherService = WeatherService(apiKey: WEATHER_API_KEY);
-    fetchWeatherData('Colombo'); // Initial city name, replace with the desired city
+    fetchWeatherData(widget.cityName);
   }
 
   Future<void> fetchWeatherData(String cityName) async {
@@ -33,7 +34,6 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   String getWeatherImage() {
-    // Map weather status to image asset
     String weatherStatus = weatherData?['current']['condition']['text'] ?? '';
     switch (weatherStatus.toLowerCase()) {
       case 'sunny':
@@ -42,7 +42,6 @@ class _HomeContentState extends State<HomeContent> {
         return 'assets/weather/cloudy.png';
       case 'rain':
         return 'assets/weather/rain.png';
-    // Add more cases for other weather conditions
       default:
         return 'assets/weather/61.png';
     }
@@ -50,21 +49,13 @@ class _HomeContentState extends State<HomeContent> {
 
   @override
   Widget build(BuildContext context) {
-    // Get today's date
     DateTime now = DateTime.now();
-
-    double deviceWidth = MediaQuery.of(context).size.width;
-
-    // Format the date using the intl package
     String formattedDate = DateFormat('dd MMM yyyy').format(now);
 
     String weatherStatus = weatherData?['current']['condition']['text'] ?? '';
     int temperature = (weatherData?['current']?['temp_c'] ?? 0).toInt();
     int wind = (weatherData?['current']?['wind_kph'] ?? 0).toInt();
     int humidity = (weatherData?['current']?['humidity'] ?? 0).toInt();
-    print('$temperature');
-    print('$wind');
-    print('$humidity');
 
     return Scaffold(
       backgroundColor: Color(0xFFF3F4FB),
@@ -91,7 +82,7 @@ class _HomeContentState extends State<HomeContent> {
                     ),
                     SizedBox(width: 8),
                     Text(
-                      'Colombo, Sri Lanka',
+                      '${widget.cityName}',
                       style: TextStyle(
                         fontFamily: 'ubuntu',
                         fontSize: 20.0,
@@ -100,37 +91,23 @@ class _HomeContentState extends State<HomeContent> {
                       ),
                     ),
                     Expanded(child: Container()),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isFavClicked = !isFavClicked;
-                        });
-                      },
-                      child: Image(
-                        image: AssetImage(
-                          isFavClicked
-                              ? 'assets/icons/add-fav-red.png'
-                              : 'assets/icons/add-fav.png',
-                        ),
-                      ),
-                    ),
                   ],
                 ),
                 Center(
                   child: Column(
                     children: [
                       Transform.translate(
-                      offset: const Offset(0, -30),
-                      child: Image(
-                          image: AssetImage(getWeatherImage()), // Dynamically change weather image
+                        offset: const Offset(0, -30),
+                        child: Image(
+                          image: AssetImage(getWeatherImage()),
                           width: 281,
                           height: 342,
                         ),
                       ),
                       Transform.translate(
                         offset: const Offset(0, -70),
-                        child:Text(
-                          '${weatherStatus}',
+                        child: Text(
+                          '$weatherStatus',
                           style: TextStyle(
                             fontFamily: 'inter',
                             fontSize: 24.0,
@@ -143,8 +120,8 @@ class _HomeContentState extends State<HomeContent> {
                 ),
                 Transform.translate(
                   offset: const Offset(0, -35),
-                  child:Center(
-                    child:Row(
+                  child: Center(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Column(
@@ -166,7 +143,7 @@ class _HomeContentState extends State<HomeContent> {
                                 color: Colors.black,
                               ),
                             ),
-                         ],
+                          ],
                         ),
                         SizedBox(width: 25),
                         Image(
@@ -202,7 +179,7 @@ class _HomeContentState extends State<HomeContent> {
                         Column(
                           children: [
                             Text(
-                              'Humidit',
+                              'Humidity',
                               style: TextStyle(
                                 fontFamily: 'inter',
                                 fontSize: 16.0,

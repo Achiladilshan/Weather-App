@@ -1,13 +1,109 @@
 import 'package:flutter/material.dart';
+import 'SearchCity.dart';
+import 'consts.dart';
+import 'weather_service.dart';
 
-class SearchContent extends StatelessWidget {
+class SearchContent extends StatefulWidget {
+  @override
+  _SearchContentState createState() => _SearchContentState();
+}
+
+class _SearchContentState extends State<SearchContent> {
+  final TextEditingController _searchController = TextEditingController();
+  WeatherService _weatherService = WeatherService(apiKey: WEATHER_API_KEY);
+  List<String> _suggestedCities = [];
+  String _selectedCity = '';
+  Map<String, dynamic> _weatherData = {};
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Color(0xFFF3F4FB),
-      child: Center(
-        child: Text('Search Content'),
+    return Scaffold(
+      backgroundColor: Color(0xFFF3F4FB),
+      appBar: AppBar(
+        title: Text('Search for city', style: TextStyle(fontFamily: 'Ubuntu', fontSize: 18.0, fontWeight: FontWeight.w600)),
+        backgroundColor: Color(0xFFF3F4FB),
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: EdgeInsets.only(left: 40.0, top: 20.0, right: 40.0),
+        child: Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: TextField(
+                controller: _searchController,
+                onChanged: _onSearchTextChanged,
+                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.normal),
+                decoration: InputDecoration(
+                  hintText: 'Enter city name',
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.all(15.0),
+                  prefixIcon: Image.asset(
+                    'assets/icons/search.png',
+                    width: 30.0,
+                    height: 30.0,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 20.0),
+            _buildSuggestedCities(),
+          ],
+        ),
       ),
     );
   }
+
+  void _onSearchTextChanged(String input) {
+    if (input.length >= 2) {
+      _weatherService.getSuggestedCities(input).then((suggestions) {
+        setState(() {
+          _suggestedCities = suggestions.take(5).toList();
+        });
+      });
+    } else {
+      setState(() {
+        _suggestedCities.clear();
+      });
+    }
+  }
+
+  Widget _buildSuggestedCities() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: _suggestedCities.map((cityAndCountry) {
+        // Split the city and country using comma as a separator
+        List<String> parts = cityAndCountry.split(', ');
+
+        return ListTile(
+          title: Text(parts[0]), // Display the city
+          subtitle: Text(parts.length > 1 ? parts[1] : ''), // Display the country if available
+          onTap: () {
+            _onCitySelected(cityAndCountry);
+          },
+        );
+      }).toList(),
+    );
+  }
+
+  void _onCitySelected(String cityAndCountry) {
+    if (cityAndCountry.isNotEmpty) {
+      setState(() {
+        _selectedCity = cityAndCountry;
+        _suggestedCities.clear();
+
+        // Navigate to SearchCity screen with the selected city and country
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => SearchCity(cityName: cityAndCountry)),
+        );
+      });
+    }
+  }
+
 }
