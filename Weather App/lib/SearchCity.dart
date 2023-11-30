@@ -108,6 +108,7 @@ class _SearchCityState extends State<SearchCity> {
                         offset: const Offset(0, -70),
                         child: Text(
                           '$weatherStatus',
+                          textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'inter',
                             fontSize: 24.0,
