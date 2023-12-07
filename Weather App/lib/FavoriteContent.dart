@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'consts.dart';
+import 'SearchCity.dart';
 import 'weather_service.dart';
 
 class FavoriteContent extends StatefulWidget {
+  final Function(String, bool) onFavoriteChanged;
   final List<String> selectedCities;
 
-  FavoriteContent({Key? key, required this.selectedCities}) : super(key: key);
+  FavoriteContent({Key? key, required this.selectedCities, required this.onFavoriteChanged,}) : super(key: key);
 
   @override
   _FavoriteContentState createState() => _FavoriteContentState();
@@ -127,13 +129,29 @@ class _FavoriteContentState extends State<FavoriteContent> {
                 ],
               ),
               onTap: () {
-                // Handle tap on the favorite item
-                // You can navigate to the details page or perform other actions
+                _onCitySelected(cityName);
               },
             ),
           );
         }
       },
     );
+  }
+
+  void _onCitySelected(String city) {
+    if (city.isNotEmpty) {
+      setState(() {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SearchCity(
+              cityName: city,
+              onFavoriteChanged: widget.onFavoriteChanged,
+              selectedCities: widget.selectedCities,
+            ),
+          ),
+        );
+      });
+    }
   }
 }
