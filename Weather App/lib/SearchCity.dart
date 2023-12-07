@@ -5,9 +5,15 @@ import 'weather_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchCity extends StatefulWidget {
+  final Function(String, bool) onFavoriteChanged;
+  final List<String> selectedCities;
   final String cityName;
 
-  SearchCity({required this.cityName});
+  SearchCity({
+    required this.cityName,
+    required this.onFavoriteChanged,
+    required this.selectedCities,
+  });
 
   @override
   _SearchCityState createState() => _SearchCityState();
@@ -23,6 +29,7 @@ class _SearchCityState extends State<SearchCity> {
     super.initState();
     weatherService = WeatherService(apiKey: WEATHER_API_KEY);
     fetchWeatherData(widget.cityName);
+    checkIfCityIsSelected();
     saveLastSelectedCity(widget.cityName); // Save the selected city
   }
 
@@ -37,8 +44,18 @@ class _SearchCityState extends State<SearchCity> {
     }
   }
 
+  void checkIfCityIsSelected() {
+    setState(() {
+      isFavClicked = widget.selectedCities.contains(widget.cityName);
+    });
+  }
+
   String getWeatherImage() {
-    String weatherStatus = weatherData?['current']['condition']['text'] ?? '';
+    if (weatherData == null) {
+      return 'assets/weather/empty.png'; // Default image when data is not available
+    }
+
+    String weatherStatus = weatherData!['current']['condition']['text'] ?? '';
     String lowercaseCondition = weatherStatus.toLowerCase();
 
     if (lowercaseCondition.contains('rain') ||
@@ -56,10 +73,15 @@ class _SearchCityState extends State<SearchCity> {
     }
   }
 
-  // Function to save the selected city to SharedPreferences
+
   Future<void> saveLastSelectedCity(String cityName) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('lastSelectedCity', cityName);
+  }
+
+  Future<void> saveSelectedCities() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('selectedCities', widget.selectedCities);
   }
 
   @override
@@ -116,6 +138,8 @@ class _SearchCityState extends State<SearchCity> {
                       onTap: () {
                         setState(() {
                           isFavClicked = !isFavClicked;
+                          widget.onFavoriteChanged(widget.cityName, isFavClicked);
+                          saveSelectedCities();
                         });
                       },
                       child: Image(

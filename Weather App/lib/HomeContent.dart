@@ -25,6 +25,7 @@ class _HomeContentState extends State<HomeContent> {
   void initState() {
     super.initState();
     weatherService = WeatherService(apiKey: WEATHER_API_KEY);
+    fetchSelectedCities();
     fetchLastSelectedCity();
   }
 
@@ -39,6 +40,19 @@ class _HomeContentState extends State<HomeContent> {
       fetchWeatherData(lastSelectedCity);
     }
   }
+
+  Future<void> fetchSelectedCities() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> storedSelectedCities = prefs.getStringList('selectedCities') ?? [];
+    widget.selectedCities.clear(); // Clear the existing list
+    widget.selectedCities.addAll(storedSelectedCities);
+  }
+
+  Future<void> saveSelectedCities() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('selectedCities', widget.selectedCities);
+  }
+
 
   Future<void> fetchWeatherData(String cityName) async {
     try {
@@ -122,6 +136,7 @@ class _HomeContentState extends State<HomeContent> {
                         setState(() {
                           isFavClicked = !isFavClicked;
                           widget.onFavoriteChanged(lastSelectedCity, isFavClicked);
+                          saveSelectedCities();
                         });
                       },
                       child: Image(

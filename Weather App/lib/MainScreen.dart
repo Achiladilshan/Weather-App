@@ -88,7 +88,10 @@ class _MainScreenState extends State<MainScreen> {
           selectedCities: selectedCities,
         );
       case 1:
-        return SearchContent();
+        return SearchContent(
+          onFavoriteChanged: onFavoriteChanged,
+          selectedCities: selectedCities,
+        );
       case 2:
         return FavoriteContent(selectedCities: selectedCities);
       default:

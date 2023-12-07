@@ -4,6 +4,11 @@ import 'consts.dart';
 import 'weather_service.dart';
 
 class SearchContent extends StatefulWidget {
+  final Function(String, bool) onFavoriteChanged;
+  final List<String> selectedCities;
+
+  SearchContent({required this.onFavoriteChanged, required this.selectedCities});
+
   @override
   _SearchContentState createState() => _SearchContentState();
 }
@@ -19,7 +24,10 @@ class _SearchContentState extends State<SearchContent> {
     return Scaffold(
       backgroundColor: Color(0xFFF3F4FB),
       appBar: AppBar(
-        title: Text('Search for city', style: TextStyle(fontFamily: 'Ubuntu', fontSize: 18.0, fontWeight: FontWeight.w600)),
+        title: Text(
+          'Search for city',
+          style: TextStyle(fontFamily: 'Ubuntu', fontSize: 18.0, fontWeight: FontWeight.w600),
+        ),
         backgroundColor: Color(0xFFF3F4FB),
         elevation: 0,
         centerTitle: true,
@@ -78,24 +86,23 @@ class _SearchContentState extends State<SearchContent> {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 2.0),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.6), // White container with transparency
+        color: Colors.white.withOpacity(0.6),
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: _suggestedCities.map((cityAndCountry) {
-          // Split the city and country using a comma as a separator
           List<String> parts = cityAndCountry.split(', ');
 
           return Column(
             children: [
               ListTile(
                 title: Text(
-                  parts[0], // Display the city
+                  parts[0],
                   style: TextStyle(fontWeight: FontWeight.w400),
                 ),
                 subtitle: Text(
-                  parts.length > 1 ? parts[1] : '', // Display the country if available
+                  parts.length > 1 ? parts[1] : '',
                   style: TextStyle(color: Color(0xFF878787)),
                 ),
                 onTap: () {
@@ -104,7 +111,7 @@ class _SearchContentState extends State<SearchContent> {
               ),
               Divider(
                 color: Color(0xFFe0e0eb),
-                height: 1, // Adjust the height of the divider
+                height: 1,
                 indent: 10,
                 endIndent: 10,
               ),
@@ -115,7 +122,6 @@ class _SearchContentState extends State<SearchContent> {
     );
   }
 
-
   void _onCitySelected(String cityAndCountry) {
     if (cityAndCountry.isNotEmpty) {
       setState(() {
@@ -123,13 +129,17 @@ class _SearchContentState extends State<SearchContent> {
         _suggestedCities.clear();
         _searchController.clear();
 
-        // Navigate to SearchCity screen with the selected city and country
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => SearchCity(cityName: cityAndCountry)),
+          MaterialPageRoute(
+            builder: (context) => SearchCity(
+              cityName: cityAndCountry,
+              onFavoriteChanged: widget.onFavoriteChanged,
+              selectedCities: widget.selectedCities,
+            ),
+          ),
         );
       });
     }
   }
-
 }
