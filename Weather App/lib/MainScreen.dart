@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-
 import 'FavoriteContent.dart';
 import 'HomeContent.dart';
 import 'SearchContent.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  const MainScreen({Key? key}) : super(key: key);
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -13,6 +12,18 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+  List<String> selectedCities = [];
+
+  // Function to handle favorite changes
+  void onFavoriteChanged(String cityName, bool isFavorite) {
+    setState(() {
+      if (isFavorite) {
+        selectedCities.add(cityName);
+      } else {
+        selectedCities.remove(cityName);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +42,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
               child: Container(
                 width: deviceWidth,
-                height: 70 + MediaQuery.of(context).padding.bottom, // Adjusted height
+                height: 70 + MediaQuery.of(context).padding.bottom,
                 color: Colors.white,
                 child: BottomNavigationBar(
                   currentIndex: _currentIndex,
@@ -57,8 +68,8 @@ class _MainScreenState extends State<MainScreen> {
                   showSelectedLabels: false,
                   showUnselectedLabels: false,
                   type: BottomNavigationBarType.fixed,
-                  backgroundColor: Colors.white, // Add this line
-                  selectedLabelStyle: TextStyle(height: 0), // Adjust the line height
+                  backgroundColor: Colors.white,
+                  selectedLabelStyle: TextStyle(height: 0),
                   unselectedLabelStyle: TextStyle(height: 0),
                 ),
               ),
@@ -72,11 +83,14 @@ class _MainScreenState extends State<MainScreen> {
   Widget _getBody() {
     switch (_currentIndex) {
       case 0:
-        return HomeContent();
+        return HomeContent(
+          onFavoriteChanged: onFavoriteChanged,
+          selectedCities: selectedCities,
+        );
       case 1:
         return SearchContent();
       case 2:
-        return FavoriteContent();
+        return FavoriteContent(selectedCities: selectedCities);
       default:
         return Container();
     }
@@ -84,10 +98,10 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildIcon(String imagePath, int index) {
     return Center(
-        child: Image.asset(
-          imagePath,
-          color: _currentIndex == index ? Colors.black : Color(0xFF979797),
-        ),
+      child: Image.asset(
+        imagePath,
+        color: _currentIndex == index ? Colors.black : Color(0xFF979797),
+      ),
     );
   }
 }

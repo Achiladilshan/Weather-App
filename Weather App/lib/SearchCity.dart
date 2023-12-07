@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'consts.dart';
 import 'weather_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchCity extends StatefulWidget {
   final String cityName;
@@ -13,13 +14,16 @@ class SearchCity extends StatefulWidget {
 }
 
 class _SearchCityState extends State<SearchCity> {
-  WeatherService weatherService = WeatherService(apiKey: WEATHER_API_KEY);
+  bool isFavClicked = false;
+  late WeatherService weatherService;
   Map<String, dynamic>? weatherData;
 
   @override
   void initState() {
     super.initState();
+    weatherService = WeatherService(apiKey: WEATHER_API_KEY);
     fetchWeatherData(widget.cityName);
+    saveLastSelectedCity(widget.cityName); // Save the selected city
   }
 
   Future<void> fetchWeatherData(String cityName) async {
@@ -35,16 +39,27 @@ class _SearchCityState extends State<SearchCity> {
 
   String getWeatherImage() {
     String weatherStatus = weatherData?['current']['condition']['text'] ?? '';
-    switch (weatherStatus.toLowerCase()) {
-      case 'sunny':
-        return 'assets/weather/sunny.png';
-      case 'cloudy':
-        return 'assets/weather/cloudy.png';
-      case 'rain':
-        return 'assets/weather/rain.png';
-      default:
-        return 'assets/weather/61.png';
+    String lowercaseCondition = weatherStatus.toLowerCase();
+
+    if (lowercaseCondition.contains('rain') ||
+        lowercaseCondition.contains('rainy') ||
+        lowercaseCondition.contains('drizzle')) {
+      return 'assets/weather/rainy.png';
+    } else if (lowercaseCondition.contains('cloud') || lowercaseCondition.contains('cloudy')) {
+      return 'assets/weather/cloudy.png';
+    } else if (lowercaseCondition.contains('thunder') || lowercaseCondition.contains('thundering')) {
+      return 'assets/weather/thunder.png';
+    } else if (lowercaseCondition.contains('sun') || lowercaseCondition.contains('sunny')) {
+      return 'assets/weather/sunny.png';
+    } else {
+      return 'assets/weather/def1.png';
     }
+  }
+
+  // Function to save the selected city to SharedPreferences
+  Future<void> saveLastSelectedCity(String cityName) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('lastSelectedCity', cityName);
   }
 
   @override
@@ -66,6 +81,16 @@ class _SearchCityState extends State<SearchCity> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                AppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  leading: IconButton(
+                    icon: Icon(Icons.arrow_back),
+                    onPressed: () {
+                      Navigator.pop(context); // Navigate back to the previous screen
+                    },
+                  ),
+                ),
                 Text(
                   'Today, $formattedDate',
                   style: TextStyle(
@@ -77,12 +102,8 @@ class _SearchCityState extends State<SearchCity> {
                 SizedBox(height: 10),
                 Row(
                   children: [
-                    Image(
-                      image: AssetImage('assets/icons/location.png'),
-                    ),
-                    SizedBox(width: 8),
                     Text(
-                      '${widget.cityName}',
+                      widget.cityName,
                       style: TextStyle(
                         fontFamily: 'ubuntu',
                         fontSize: 20.0,
@@ -91,6 +112,20 @@ class _SearchCityState extends State<SearchCity> {
                       ),
                     ),
                     Expanded(child: Container()),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isFavClicked = !isFavClicked;
+                        });
+                      },
+                      child: Image(
+                        image: AssetImage(
+                          isFavClicked
+                              ? 'assets/icons/add-fav-red.png'
+                              : 'assets/icons/add-fav.png',
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 Center(
@@ -99,7 +134,7 @@ class _SearchCityState extends State<SearchCity> {
                       Transform.translate(
                         offset: const Offset(0, -30),
                         child: Image(
-                          image: AssetImage(getWeatherImage()),
+                          image: AssetImage(getWeatherImage()), // Dynamically change weather image
                           width: 281,
                           height: 342,
                         ),
@@ -107,7 +142,7 @@ class _SearchCityState extends State<SearchCity> {
                       Transform.translate(
                         offset: const Offset(0, -70),
                         child: Text(
-                          '$weatherStatus',
+                          '${weatherStatus}',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'inter',
@@ -180,7 +215,7 @@ class _SearchCityState extends State<SearchCity> {
                         Column(
                           children: [
                             Text(
-                              'Humidity',
+                              'Humidit',
                               style: TextStyle(
                                 fontFamily: 'inter',
                                 fontSize: 16.0,

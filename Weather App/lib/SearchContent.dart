@@ -121,6 +121,7 @@ class _SearchContentState extends State<SearchContent> {
       setState(() {
         _selectedCity = cityAndCountry;
         _suggestedCities.clear();
+        _searchController.clear();
 
         // Navigate to SearchCity screen with the selected city and country
         Navigator.push(
