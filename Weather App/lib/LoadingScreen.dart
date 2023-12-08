@@ -37,11 +37,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
                     width: 280, // Adjust the width of the LinearProgressIndicator
                     child: LinearProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      backgroundColor: Colors.grey, // Set the background color
+                      backgroundColor: Colors.grey, // background color
                     ),
                   ),
                   FutureBuilder(
-                    future: Future.delayed(Duration(seconds: 3)),
+                    future: Future.delayed(Duration(seconds: 3)),//the loading duration
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.done) {
                         // Navigation after 3 seconds

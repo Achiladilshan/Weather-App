@@ -4,8 +4,8 @@ import 'consts.dart';
 import 'weather_service.dart';
 
 class SearchContent extends StatefulWidget {
-  final Function(String, bool) onFavoriteChanged;
-  final List<String> selectedCities;
+  final Function(String, bool) onFavoriteChanged;//store favicon clicked or not
+  final List<String> selectedCities;//store favorite cities list
 
   SearchContent({required this.onFavoriteChanged, required this.selectedCities});
 
@@ -16,7 +16,7 @@ class SearchContent extends StatefulWidget {
 class _SearchContentState extends State<SearchContent> {
   final TextEditingController _searchController = TextEditingController();
   WeatherService _weatherService = WeatherService(apiKey: WEATHER_API_KEY);
-  List<String> _suggestedCities = [];
+  List<String> _suggestedCities = [];//store sugessted cities
   String _selectedCity = '';
 
   @override
@@ -66,6 +66,7 @@ class _SearchContentState extends State<SearchContent> {
     );
   }
 
+  //when typing search cities form the phrase
   void _onSearchTextChanged(String input) {
     if (input.length >= 1) {
       _weatherService.getSuggestedCities(input).then((suggestions) {

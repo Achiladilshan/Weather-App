@@ -19,7 +19,7 @@ class _HomeContentState extends State<HomeContent> {
   bool isFavClicked = false;
   late WeatherService weatherService;
   Map<String, dynamic>? weatherData;
-  String lastSelectedCity = 'colombo';
+  String lastSelectedCity = 'colombo';//when open first time colombo weather shown
 
   @override
   void initState() {
@@ -45,7 +45,7 @@ class _HomeContentState extends State<HomeContent> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> storedSelectedCities = prefs.getStringList('selectedCities') ?? [];
     widget.selectedCities.clear(); // Clear the existing list
-    widget.selectedCities.addAll(storedSelectedCities);
+    widget.selectedCities.addAll(storedSelectedCities); // add cities to the list from the history
   }
 
   Future<void> saveSelectedCities() async {
@@ -101,168 +101,290 @@ class _HomeContentState extends State<HomeContent> {
     int wind = (weatherData?['current']?['wind_kph'] ?? 0).toInt();
     int humidity = (weatherData?['current']?['humidity'] ?? 0).toInt();
 
-    return Scaffold(
-      backgroundColor: Color(0xFFF3F4FB),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(left: 24.0, top: 25.0, right: 24.0),
-          child: Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Today, $formattedDate',
-                  style: TextStyle(
-                    fontFamily: 'ubuntu',
-                    fontSize: 14.0,
-                    color: Color(0xFFA1A1A4),
-                  ),
-                ),
-                SizedBox(height: 10),
-                Row(
+    return Stack(
+      children:[
+        Scaffold(
+          backgroundColor: Color(0xFFF3F4FB),
+          body: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.only(left: 24.0, top: 25.0, right: 24.0),
+              child: Container(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      lastSelectedCity,
+                      'Today, $formattedDate',
                       style: TextStyle(
                         fontFamily: 'ubuntu',
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        fontSize: 14.0,
+                        color: Color(0xFFA1A1A4),
                       ),
                     ),
-                    Expanded(child: Container()),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isFavClicked = !isFavClicked;
-                          widget.onFavoriteChanged(lastSelectedCity, isFavClicked);
-                          saveSelectedCities();
-                        });
-                      },
-                      child: Image(
-                        image: AssetImage(
-                          isFavClicked
-                              ? 'assets/icons/add-fav-red.png'
-                              : 'assets/icons/add-fav.png',
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Text(
+                          lastSelectedCity,
+                          style: TextStyle(
+                            fontFamily: 'ubuntu',
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Expanded(child: Container()),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              isFavClicked = !isFavClicked;
+                              widget.onFavoriteChanged(lastSelectedCity, isFavClicked);
+                              saveSelectedCities();
+                            });
+                          },
+                          child: Image(
+                            image: AssetImage(
+                              isFavClicked
+                                  ? 'assets/icons/add-fav-red.png'
+                                  : 'assets/icons/add-fav.png',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Center(
+                      child: Column(
+                        children: [
+                          Transform.translate(
+                            offset: const Offset(0, -30),
+                            child: Image(
+                              image: AssetImage(getWeatherImage()),
+                              width: 281,
+                              height: 342,
+                            ),
+                          ),
+                          Transform.translate(
+                            offset: const Offset(0, -70),
+                            child: Text(
+                              '$weatherStatus',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: 'inter',
+                                fontSize: 24.0,
+                                color: Color(0xFF6066A6),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Transform.translate(
+                      offset: const Offset(0, -35),
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Column(
+                              children: [
+                                Text(
+                                  'Wind',
+                                  style: TextStyle(
+                                    fontFamily: 'inter',
+                                    fontSize: 16.0,
+                                    color: Color(0xFFA2A2BE),
+                                  ),
+                                ),
+                                Text(
+                                  '$wind km/h',
+                                  style: TextStyle(
+                                    fontFamily: 'inter',
+                                    fontSize: 24.0,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(width: 25),
+                            Image(
+                              image: AssetImage('assets/icons/line.png'),
+                            ),
+                            SizedBox(width: 25),
+                            Column(
+                              children: [
+                                Text(
+                                  'Temp',
+                                  style: TextStyle(
+                                    fontFamily: 'inter',
+                                    fontSize: 16.0,
+                                    color: Color(0xFFA2A2BE),
+                                  ),
+                                ),
+                                Text(
+                                  '$temperature℃',
+                                  style: TextStyle(
+                                    fontFamily: 'inter',
+                                    fontSize: 24.0,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(width: 25),
+                            Image(
+                              image: AssetImage('assets/icons/line.png'),
+                            ),
+                            SizedBox(width: 25),
+                            Column(
+                              children: [
+                                Text(
+                                  'Humidit',
+                                  style: TextStyle(
+                                    fontFamily: 'inter',
+                                    fontSize: 16.0,
+                                    color: Color(0xFFA2A2BE),
+                                  ),
+                                ),
+                                Text(
+                                  '$humidity%',
+                                  style: TextStyle(
+                                    fontFamily: 'inter',
+                                    fontSize: 24.0,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ],
                 ),
-                Center(
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: -420,
+          left: 0,
+          right: 0,
+          child: Stack(
+            children: [
+              Image(
+                image: AssetImage('assets/images/scroll.png'),
+                fit: BoxFit.cover,
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 22.0, top: 25.0, right: 22.0),
+                child: Container(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Transform.translate(
-                        offset: const Offset(0, -30),
-                        child: Image(
-                          image: AssetImage(getWeatherImage()),
-                          width: 281,
-                          height: 342,
+                      Text(
+                        'Today',
+                        style: TextStyle(
+                          fontFamily: 'inter',
+                          fontSize: 18.0,
+                          color: Color(0xFF4E4771),
                         ),
                       ),
-                      Transform.translate(
-                        offset: const Offset(0, -70),
-                        child: Text(
-                          '$weatherStatus',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'inter',
-                            fontSize: 24.0,
-                            color: Color(0xFF6066A6),
-                          ),
+                      SizedBox(height: 20),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal, // Set the scroll direction to horizontal
+                        child: Row(
+                          children: [
+                            Container(
+                              height: 117,
+                              width: 69,
+                              decoration: BoxDecoration(
+                                color: Color(0x73FFFFFF),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              // Add your content inside the box
+                            ),
+                            SizedBox(width: 10),
+                            Container(
+                              height: 117,
+                              width: 69,
+                              decoration: BoxDecoration(
+                                color: Color(0x73FFFFFF),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              // Add your content inside the box
+                            ),
+                            SizedBox(width: 10),
+                            Container(
+                              height: 117,
+                              width: 69,
+                              decoration: BoxDecoration(
+                                color: Color(0x73FFFFFF),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              // Add your content inside the box
+                            ),
+                            SizedBox(width: 10),
+                            Container(
+                              height: 117,
+                              width: 69,
+                              decoration: BoxDecoration(
+                                color: Color(0x73FFFFFF),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              // Add your content inside the box
+                            ),
+                            SizedBox(width: 10),
+                            Container(
+                              height: 117,
+                              width: 69,
+                              decoration: BoxDecoration(
+                                color: Color(0x73FFFFFF),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              // Add your content inside the box
+                            ),
+                            SizedBox(width: 10),
+                            Container(
+                              height: 117,
+                              width: 69,
+                              decoration: BoxDecoration(
+                                color: Color(0x73FFFFFF),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              // Add your content inside the box
+                            ),
+                            SizedBox(width: 10),
+                            Container(
+                              height: 117,
+                              width: 69,
+                              decoration: BoxDecoration(
+                                color: Color(0x73FFFFFF),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              // Add your content inside the box
+                            ),
+                            SizedBox(width: 10),
+                            Container(
+                              height: 117,
+                              width: 69,
+                              decoration: BoxDecoration(
+                                color: Color(0x73FFFFFF),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              // Add your content inside the box
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-                Transform.translate(
-                  offset: const Offset(0, -35),
-                  child: Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Column(
-                          children: [
-                            Text(
-                              'Wind',
-                              style: TextStyle(
-                                fontFamily: 'inter',
-                                fontSize: 16.0,
-                                color: Color(0xFFA2A2BE),
-                              ),
-                            ),
-                            Text(
-                              '$wind km/h',
-                              style: TextStyle(
-                                fontFamily: 'inter',
-                                fontSize: 24.0,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(width: 25),
-                        Image(
-                          image: AssetImage('assets/icons/line.png'),
-                        ),
-                        SizedBox(width: 25),
-                        Column(
-                          children: [
-                            Text(
-                              'Temp',
-                              style: TextStyle(
-                                fontFamily: 'inter',
-                                fontSize: 16.0,
-                                color: Color(0xFFA2A2BE),
-                              ),
-                            ),
-                            Text(
-                              '$temperature℃',
-                              style: TextStyle(
-                                fontFamily: 'inter',
-                                fontSize: 24.0,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(width: 25),
-                        Image(
-                          image: AssetImage('assets/icons/line.png'),
-                        ),
-                        SizedBox(width: 25),
-                        Column(
-                          children: [
-                            Text(
-                              'Humidit',
-                              style: TextStyle(
-                                fontFamily: 'inter',
-                                fontSize: 16.0,
-                                color: Color(0xFFA2A2BE),
-                              ),
-                            ),
-                            Text(
-                              '$humidity%',
-                              style: TextStyle(
-                                fontFamily: 'inter',
-                                fontSize: 24.0,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      ),
+      ],
     );
   }
 }

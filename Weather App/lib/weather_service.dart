@@ -1,15 +1,14 @@
-// weather_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class WeatherService {
   final String apiKey;
-  final String baseUrl = 'https://api.weatherapi.com/v1/current.json';
+  final String baseUrl = 'https://api.weatherapi.com/v1/current.json';//the url for connect with the api
 
   WeatherService({required this.apiKey});
 
   Future<Map<String, dynamic>> getWeather(String cityName) async {
-    final String apiUrl = '$baseUrl?key=$apiKey&q=$cityName';
+    final String apiUrl = '$baseUrl?key=$apiKey&q=$cityName';//the string for connect api
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -24,6 +23,7 @@ class WeatherService {
     }
   }
 
+  //when enter letters suggest cities
   Future<List<String>> getSuggestedCities(String prefix) async {
     final String apiUrl = 'https://api.weatherapi.com/v1/search.json?key=$apiKey&q=$prefix';
 
@@ -48,6 +48,7 @@ class WeatherService {
     }
   }
 
+  //the city and country format
   String _formatCityAndCountry(dynamic item) {
     final String city = item['name'].toString();
     final String country = item['country'].toString();

@@ -4,8 +4,8 @@ import 'SearchCity.dart';
 import 'weather_service.dart';
 
 class FavoriteContent extends StatefulWidget {
-  final Function(String, bool) onFavoriteChanged;
-  final List<String> selectedCities;
+  final Function(String, bool) onFavoriteChanged;//store favicon clicked or not
+  final List<String> selectedCities;//store favorite cities list
 
   FavoriteContent({Key? key, required this.selectedCities, required this.onFavoriteChanged,}) : super(key: key);
 
@@ -18,7 +18,7 @@ class _FavoriteContentState extends State<FavoriteContent> {
 
   @override
   Widget build(BuildContext context) {
-    _weatherService = WeatherService(apiKey: WEATHER_API_KEY);
+    _weatherService = WeatherService(apiKey: WEATHER_API_KEY);//call weather service class
 
     return Scaffold(
       backgroundColor: Color(0xFFF3F4FB),
@@ -46,7 +46,7 @@ class _FavoriteContentState extends State<FavoriteContent> {
                 itemCount: widget.selectedCities.length,
                 itemBuilder: (context, index) {
                   String cityName = widget.selectedCities[index];
-                  return _buildFavoriteItem(cityName);
+                  return _buildFavoriteItem(cityName); //call _buildFavoriteItem method to build the widget for the cities
                 },
               ),
             ],
@@ -71,7 +71,7 @@ class _FavoriteContentState extends State<FavoriteContent> {
           int wind = (weatherData?['current']?['wind_kph'] ?? 0).toInt();
           int humidity = (weatherData?['current']?['humidity'] ?? 0).toInt();
 
-          return Card(
+          return Card(//the card that in the favorite page
             elevation: 5,
             margin: EdgeInsets.symmetric(vertical: 10),
             child: ListTile(
@@ -129,7 +129,7 @@ class _FavoriteContentState extends State<FavoriteContent> {
                 ],
               ),
               onTap: () {
-                _onCitySelected(cityName);
+                _onCitySelected(cityName);//when tap on a card go to detailed page of the city
               },
             ),
           );

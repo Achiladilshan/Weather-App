@@ -83,17 +83,17 @@ class _MainScreenState extends State<MainScreen> {
   Widget _getBody() {
     switch (_currentIndex) {
       case 0:
-        return HomeContent(
+        return HomeContent(//go to homecontent page
           onFavoriteChanged: onFavoriteChanged,
           selectedCities: selectedCities,
         );
       case 1:
-        return SearchContent(
+        return SearchContent(//go to searchcontent page
           onFavoriteChanged: onFavoriteChanged,
           selectedCities: selectedCities,
         );
       case 2:
-        return FavoriteContent(
+        return FavoriteContent(//go to favcontent page
             onFavoriteChanged: onFavoriteChanged,
             selectedCities: selectedCities,
         );
